@@ -73,3 +73,11 @@ class Investment(models.Model):
 
     class Meta:
         db_table = "investments"
+
+
+class Image(models.Model):
+    url        = models.URLField(max_length=256)
+    investment = models.IntegerField()
+
+    class Meta:
+        db_table = "images"
