@@ -4,6 +4,9 @@ from core.models import TimeStamp
 
 
 class Bank(models.Model):
+    class DefaultBank(models.IntegerChoices):
+        NH_BANK = 2
+
     name = models.CharField(max_length=32)
 
     class Meta:
@@ -13,9 +16,9 @@ class Bank(models.Model):
 class Deposit(models.Model):
     withdrawal_account = models.CharField(max_length=32)
     withdrawal_bank    = models.ForeignKey(Bank, related_name="deposit_withdrawal" ,on_delete=models.PROTECT)
-    deposit_account    = models.CharField(max_length=32)
+    deposit_account    = models.CharField(max_length=32, unique=True)
     deposit_bank       = models.ForeignKey(Bank, related_name="deposit", on_delete=models.PROTECT)
-    balance            = models.PositiveBigIntegerField()
+    balance            = models.PositiveBigIntegerField(default=0)
 
     class Meta:
         db_table = "deposit"
