@@ -186,3 +186,107 @@ class InvestTransactionTest(TestCase):
         )
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json(), {"message": "INVALID_TOKEN"})
+
+
+class DepositTransition(TestCase):
+    def setUp(self):
+        Bank.objects.create(id=2, name="농협은행")
+
+        Deposit.objects.create(
+            id=1,
+            withdrawal_account="111-222-333",
+            withdrawal_bank_id=2,
+            deposit_account="444-555-666",
+            deposit_bank_id=2,
+            balance=300000,
+        )
+
+        User.objects.create(
+            id=2,
+            name="무현",
+            email="example@naver.com",
+            phone_number="010-2222-4444",
+            password="1234dfsdflker@!",
+            deposit_id=1,
+        )
+
+        TransactionType.objects.create(id=2, name="입금")
+
+    def tearDown(self):
+        User.objects.all().delete()
+        Deposit.objects.all().delete()
+        Bank.objects.all().delete()
+
+    def test_deposit_transaction_post_success(self):
+        client = Client()
+        deposit_amounts = {"amounts": 300000}
+        header = {
+            "HTTP_Authorization": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6Mn0._fleYhEIx5512GwejJ70cid7blXOsKEmcbf5zeHBHtA"
+        }
+        response = client.post(
+            "/transactions/deposit",
+            json.dumps(deposit_amounts),
+            content_type="application/json",
+            **header
+        )
+        self.assertEqual(response.status_code, 201)
+
+    def test_deposit_transaction_post_invalid_input(self):
+        client = Client()
+        deposit_amounts = {"amounts": -300000}
+        header = {
+            "HTTP_Authorization": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6Mn0._fleYhEIx5512GwejJ70cid7blXOsKEmcbf5zeHBHtA"
+        }
+        response = client.post(
+            "/transactions/deposit",
+            json.dumps(deposit_amounts),
+            content_type="application/json",
+            **header
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), {"message": "INVALID_INPUT"})
+
+    def test_deposit_transaction_post_type_error(self):
+        client = Client()
+        deposit_amounts = {"amounts": "300000"}
+        header = {
+            "HTTP_Authorization": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6Mn0._fleYhEIx5512GwejJ70cid7blXOsKEmcbf5zeHBHtA"
+        }
+        response = client.post(
+            "/transactions/deposit",
+            json.dumps(deposit_amounts),
+            content_type="application/json",
+            **header
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), {"message": "TYPE_ERROR"})
+
+    def test_deposit_transaction_post_key_error(self):
+        client = Client()
+        deposit_amounts = {"amount": 300000}
+        header = {
+            "HTTP_Authorization": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6Mn0._fleYhEIx5512GwejJ70cid7blXOsKEmcbf5zeHBHtA"
+        }
+        response = client.post(
+            "/transactions/deposit",
+            json.dumps(deposit_amounts),
+            content_type="application/json",
+            **header
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), {"message": "KEY_ERROR"})
+
+    def test_deposit_transaction_post_invalid_token(self):
+        client = Client()
+        invest_amount = {"amounts": 300000}
+        header = {
+            "HTTP_Authorization": "yJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6Mn0._fleYhEIx5512GwejJ70cid7blXOsKEmcbf5zeHBHtA"
+        }
+        response = client.post(
+            "/transactions/deposit",
+            json.dumps(invest_amount),
+            content_type="application/json",
+            **header
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), {"message": "INVALID_TOKEN"})
