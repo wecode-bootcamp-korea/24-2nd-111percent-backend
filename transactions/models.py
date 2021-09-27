@@ -25,6 +25,12 @@ class Deposit(models.Model):
 
 
 class TransactionType(models.Model):
+    class Type(models.IntegerChoices):
+        PAYMENT    = 1
+        DEPOSIT    = 2
+        WITHDRAWAL = 3
+        INVESTMENT = 4
+
     name = models.CharField(max_length=16)
 
     class Meta:
