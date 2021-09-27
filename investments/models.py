@@ -41,6 +41,7 @@ class InvestmentDetail(models.Model):
     evaluation_price     = models.PositiveBigIntegerField()
     repayment_day        = models.PositiveSmallIntegerField()
     priority_bond_amount = models.PositiveIntegerField()
+    bidding_rate         = models.FloatField(null=True)
 
     class Meta:
         db_table = "investment_details"
@@ -77,7 +78,7 @@ class Investment(models.Model):
 
 class Image(models.Model):
     url        = models.URLField(max_length=256)
-    investment = models.IntegerField()
+    investment = models.ForeignKey(Investment, on_delete=models.CASCADE)
 
     class Meta:
         db_table = "images"

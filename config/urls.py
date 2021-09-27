@@ -17,5 +17,6 @@ from django.urls import path, include
 
 urlpatterns = [
     path("users", include("users.urls")),
+    path("investments", include("investments.urls")), 
     path("transactions", include("transactions.urls")),
 ]
