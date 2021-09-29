@@ -357,3 +357,4 @@ zsdoc/data
 !/tests/_output/.gitkeep
 
 my_settings.py
+investment.csv

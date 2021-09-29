@@ -3,4 +3,5 @@ from .           import views
 
 urlpatterns = [
     path('/listview', views.InvestmentListView.as_view()), 
+    path('/<int:investment_id>', views.InvestmentDetailView.as_view())
     ]
