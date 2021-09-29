@@ -118,6 +118,6 @@ class InvestmentListErrorTest(TestCase):
         client   = Client()
         response = client.get('/investments/listview')
 
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.status_code, 404)
 
         self.assertEqual(response.json(), {'MESSAGE' : 'INVESTMENTS_DOES_NOT_EXISTS'})
