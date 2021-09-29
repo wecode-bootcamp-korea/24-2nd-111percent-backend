@@ -93,7 +93,13 @@ class InvestTransactionTest(TestCase):
 
         TransactionType.objects.create(id=4, name="투자")
 
+        InvestmentState.objects.create(id=1, name="투자중")
+
+        RepaymentState.objects.create(id=1, name="정상")
+
+
     def tearDown(self):
+        TransactionType.objects.all().delete()
         User.objects.all().delete()
         Deposit.objects.all().delete()
         Bank.objects.all().delete()

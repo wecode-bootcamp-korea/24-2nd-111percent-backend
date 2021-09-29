@@ -36,6 +36,9 @@ class InvestTransactionView(View):
 
             investment_amount = data["amounts"]
 
+            if investment_amount > deposit.balance:
+                return JsonResponse({"message": "OUT_OF_RANGE"}, status=400)
+
             with transaction.atomic():
                 Transaction.objects.create(
                     type_id=TransactionType.Type.INVESTMENT.value,
@@ -46,11 +49,21 @@ class InvestTransactionView(View):
                     investment=investment,
                 )
 
+                portfolio, created = Portfolio.objects.get_or_create(
+                    user=user,
+                    investment=investment,
+                    investment_state_id=InvestmentState.State.INVESTING.value,
+                    repayment_state_id=RepaymentState.State.NORMAL.value,
+                )
+
                 deposit.balance -= investment_amount
                 deposit.save()
 
                 investment.current_amount += investment_amount
                 investment.save()
+
+                portfolio.amounts += investment_amount
+                portfolio.save()
 
             return JsonResponse({"message": "SUCCESS"}, status=201)
 
