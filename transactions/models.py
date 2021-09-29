@@ -1,3 +1,4 @@
+from investments.models import Investment
 from django.db import models
 
 from core.models import TimeStamp
@@ -58,6 +59,41 @@ class Repayment(models.Model):
     interest        = models.PositiveIntegerField()
     tax             = models.PositiveIntegerField()
     charge          = models.PositiveIntegerField()
+    user            = models.ForeignKey("users.User", null=True, on_delete=models.CASCADE)
 
     class Meta:
         db_table = "repayments"
+
+class InvestmentState(models.Model):
+    class State(models.IntegerChoices):
+        INVESTING = 1
+        COMPLETE  = 2
+        LOSS      = 3
+    
+    name = models.CharField(max_length=16)
+
+    class Meta:
+        db_table = "investment_states"
+
+
+class RepaymentState(models.Model):
+    class State(models.IntegerChoices):
+        NORMAL  = 1
+        DELAY   = 2
+        OVERDUE = 3
+    
+    name = models.CharField(max_length=16)
+
+    class Meta:
+        db_table = "repayment_states"
+
+
+class Portfolio(models.Model):
+    user             = models.ForeignKey("users.User", on_delete=models.CASCADE)
+    investment       = models.ForeignKey("investments.Investment", on_delete=models.CASCADE)
+    amounts          = models.PositiveIntegerField()
+    investment_state = models.ForeignKey(InvestmentState, on_delete=models.PROTECT)
+    repayment_state  = models.ForeignKey(RepaymentState, on_delete=models.PROTECT)
+
+    class Meta:
+        db_table = "portfolios"
