@@ -6,4 +6,5 @@ urlpatterns = [
     path("/deposit", views.DepositTransactionView.as_view()),
     path("/portfolio", views.PortfolioView.as_view()),
     path("/transaction", views.TransactionInformationView.as_view()),
+    path("/withdrawal", views.WithdrawalView.as_view())
 ]
