@@ -91,7 +91,7 @@ class RepaymentState(models.Model):
 class Portfolio(models.Model):
     user             = models.ForeignKey("users.User", on_delete=models.CASCADE)
     investment       = models.ForeignKey("investments.Investment", on_delete=models.CASCADE)
-    amounts          = models.PositiveIntegerField()
+    amounts          = models.PositiveIntegerField(default=0)
     investment_state = models.ForeignKey(InvestmentState, on_delete=models.PROTECT)
     repayment_state  = models.ForeignKey(RepaymentState, on_delete=models.PROTECT)
 
