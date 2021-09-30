@@ -276,3 +276,38 @@ class TransactionInformationView(View):
                 "information"  : transaction.information,
                 "amounts"      : transaction.amounts
                 } for transaction in transactions]}, status = 200)
+
+class WithdrawalView(View):
+    @login_decorator
+    def post(self, request):
+        try:
+            data = json.loads(request.body)
+            deposit = request.user.deposit
+
+            if data["amounts"] <= 0:
+                return JsonResponse({"message": "INVALID_INPUT"}, status=400)
+            
+            if data["amounts"] > deposit.balance:
+                return JsonResponse({"message": "WRONG_REQUEST"}, status=400)
+
+            with transaction.atomic():
+                Transaction.objects.create(
+                    type_id=TransactionType.Type.WITHDRAWAL.value,
+                    information=Bank.objects.get(id=deposit.withdrawal_bank.id).name,
+                    amounts=data["amounts"],
+                    deposit=deposit,
+                    user=request.user,
+                )
+
+                deposit.balance -= data["amounts"]
+                deposit.save()
+
+            return JsonResponse(
+                {"message": "SUCCESS", "deposit_balance": deposit.balance}, status=201
+            )
+
+        except TypeError:
+            return JsonResponse({"message": "TYPE_ERROR"}, status=400)
+
+        except KeyError:
+            return JsonResponse({"message": "KEY_ERROR"}, status=400)
