@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.views import View
 from django.db import transaction
 from django.db.models import Sum, Avg
+from django.db.models import Q
 
 from transactions.models import (
     Repayment,
@@ -254,3 +255,24 @@ class PortfolioView(View):
         }
 
         return JsonResponse({"results": results}, status=200)
+
+
+class TransactionInformationView(View):
+    @login_decorator
+    def get(self, request):
+
+        type_id = request.GET.get("type_id",None)
+        q = Q()
+
+        if type_id:
+            q = Q(type = type_id)
+        
+        transactions = Transaction.objects.filter(user = request.user).filter(q)
+        
+        return JsonResponse({"transactions" : [
+            {
+                "created_time" : transaction.created_time, 
+                "type"         : transaction.type.name,
+                "information"  : transaction.information,
+                "amounts"      : transaction.amounts
+                } for transaction in transactions]}, status = 200)

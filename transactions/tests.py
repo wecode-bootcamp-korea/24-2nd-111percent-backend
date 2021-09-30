@@ -11,6 +11,9 @@ from transactions.models import (
     RepaymentState,
     Portfolio,
 )
+
+from transactions.models import Deposit, TransactionType, Deposit, Bank, Transaction
+
 from investments.models import (
     Grade,
     RepaymentType,
@@ -357,26 +360,6 @@ class PortfolioTest(TestCase):
             borrower_id=1,
         )
 
-        Bank.objects.create(id=2, name="농협은행")
-
-        Deposit.objects.create(
-            id=1,
-            withdrawal_account="111-222-333",
-            withdrawal_bank_id=2,
-            deposit_account="444-555-666",
-            deposit_bank_id=2,
-            balance=300000,
-        )
-
-        User.objects.create(
-            id=2,
-            name="무현",
-            email="example@naver.com",
-            phone_number="010-2222-4444",
-            password="1234dfsdflker@!",
-            deposit_id=1,
-        )
-
         InvestmentState.objects.bulk_create(
             [
                 InvestmentState(id=1, name="투자중"),
@@ -478,3 +461,67 @@ class PortfolioTest(TestCase):
         )
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json(), {"message": "INVALID_TOKEN"})
+
+
+class TransactionInformationTest(TestCase):
+    def setUp(self):
+        Bank.objects.create(id=2, name="농협은행")
+
+        Deposit.objects.create(
+            id                =1,
+            withdrawal_account="111-222-333",
+            withdrawal_bank_id=2,
+            deposit_account   ="444-555-666",
+            deposit_bank_id   =2,
+            balance           =300000,
+        )
+
+        User.objects.create(
+            id          =2,
+            name        ="무현",
+            email       ="example@naver.com",
+            phone_number="010-2222-4444",
+            password    ="1234dfsdflker@!",
+            deposit_id  =1,
+        )
+        TransactionType.objects.create(
+            id  =4,
+            name="투자"
+        )
+
+        Transaction.objects.create(
+            id         =1,
+            type_id    =4,
+            information="주거안정 406호",
+            amounts    =100000,
+            deposit_id =1,
+            user_id    =2,
+        )
+
+    def tearDown(self):
+        Transaction.objects.all().delete()
+        TransactionType.objects.all().delete()
+        User.objects.all().delete()
+        Deposit.objects.all().delete()
+        Bank.objects.all().delete()
+
+    def test_transaction_information_get_success(self):
+        client = Client()
+        header = {
+            "HTTP_Authorization": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6Mn0.G9SKGv3338DXgNWbuVLZ8n3NZHHbo8VQtr3lp_8UfFg"
+        }
+        response = client.get('/transactions/transaction', content_type="application/json", **header)
+        transaction = Transaction.objects.get(id=1)
+        
+        self.assertEqual(response.json(), 
+            {"transactions" :
+                [{
+                    'created_time' : transaction.created_time.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z",
+                    'type'         : "투자",
+                    'information'  : "주거안정 406호",
+                    'amounts'      : 100000,
+                }],
+            }
+        )
+        
+        self.assertEqual(response.status_code, 200)
