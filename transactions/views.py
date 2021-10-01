@@ -126,42 +126,51 @@ class PortfolioView(View):
                 "deposit_account": f"{deposit.deposit_bank.name}{deposit.deposit_account}",
                 "deposit_balance": deposit.balance,
                 "gross_investment_limit": 30000000
-                - portfolios.aggregate(assets=Sum("amounts"))["assets"],
+                - portfolios.aggregate(assets=Sum("amounts")).get("amounts", 0),
                 "real_estate_investment_limit": 10000000
-                - portfolios.aggregate(assets=Sum("amounts"))["assets"],
+                - portfolios.aggregate(assets=Sum("amounts")).get("amounts", 0),
             },
             "investment_general_infomation": {
                 "rate_of_return": portfolios.aggregate(
                     rate_of_return=Avg("investment__return_rate")
-                )["rate_of_return"],
-                "assets": portfolios.aggregate(assets=Sum("amounts"))["assets"]
-                + deposit.balance,
+                ).get("rate_of_return")
+                or 0,
+                "assets": portfolios.aggregate(assets=Sum("amounts")).get("assets")
+                or 0 + deposit.balance,
                 "cumulative_profit": repayments.aggregate(
                     cumulative_profit=Sum("interest")
-                )["cumulative_profit"],
+                ).get("cumulative_profit")
+                or 0,
             },
             "investment_current_condition": {
                 "all": [
                     {
                         "id": 1,
                         "name": "investing_amount",
-                        "price": portfolio_investings.aggregate(amounts=Sum("amounts"))[
-                            "amounts"
-                        ],
+                        "price": portfolio_investings.aggregate(
+                            amounts=Sum("amounts")
+                        ).get("amounts")
+                        or 0,
                     },
                     {
                         "id": 2,
                         "name": "invest_completed_amount",
                         "price": portfolios.filter(
                             investment_state_id=InvestmentState.State.COMPLETE.value
-                        ).aggregate(amounts=Sum("amounts"))["amounts"],
+                        )
+                        .aggregate(amounts=Sum("amounts"))
+                        .get("amounts")
+                        or 0,
                     },
                     {
                         "id": 3,
                         "name": "loss_amount",
                         "price": portfolios.filter(
                             investment_state_id=InvestmentState.State.LOSS.value
-                        ).aggregate(amounts=Sum("amounts"))["amounts"],
+                        )
+                        .aggregate(amounts=Sum("amounts"))
+                        .get("amounts")
+                        or 0,
                     },
                 ],
                 "investing": [
@@ -170,21 +179,30 @@ class PortfolioView(View):
                         "name": "investing_normal_amount",
                         "price": portfolio_investings.filter(
                             repayment_state_id=RepaymentState.State.NORMAL.value
-                        ).aggregate(amounts=Sum("amounts"))["amounts"],
+                        )
+                        .aggregate(amounts=Sum("amounts"))
+                        .get("amounts")
+                        or 0,
                     },
                     {
                         "id": 2,
                         "name": "investing_delay_amount",
                         "price": portfolio_investings.filter(
                             repayment_state_id=RepaymentState.State.DELAY.value
-                        ).aggregate(amounts=Sum("amounts"))["amounts"],
+                        )
+                        .aggregate(amounts=Sum("amounts"))
+                        .get("amounts")
+                        or 0,
                     },
                     {
                         "id": 3,
                         "name": "investing_overdue_amount",
                         "price": portfolio_investings.filter(
                             repayment_state_id=RepaymentState.State.OVERDUE.value
-                        ).aggregate(amounts=Sum("amounts"))["amounts"],
+                        )
+                        .aggregate(amounts=Sum("amounts"))
+                        .get("amounts")
+                        or 0,
                     },
                 ],
             },
@@ -195,37 +213,50 @@ class PortfolioView(View):
                         "name": "A",
                         "price": portfolios.filter(
                             investment__grade__name__contains="A"
-                        ).aggregate(amounts=Sum("amounts"))["amounts"],
+                        )
+                        .aggregate(amounts=Sum("amounts"))
+                        .get("amounts")
+                        or 0,
                     },
                     {
                         "id": 2,
                         "name": "B",
                         "price": portfolios.filter(
                             investment__grade__name__contains="B"
-                        ).aggregate(amounts=Sum("amounts"))["amounts"],
+                        )
+                        .aggregate(amounts=Sum("amounts"))
+                        .get("amounts")
+                        or 0,
                     },
                     {
                         "id": 3,
                         "name": "C",
                         "price": portfolios.filter(
                             investment__grade__name__contains="C"
-                        ).aggregate(amounts=Sum("amounts"))["amounts"],
+                        )
+                        .aggregate(amounts=Sum("amounts"))
+                        .get("amounts")
+                        or 0,
                     },
                     {
                         "id": 4,
                         "name": "D",
                         "price": portfolios.filter(
                             investment__grade__name__contains="D"
-                        ).aggregate(amounts=Sum("amounts"))["amounts"],
+                        )
+                        .aggregate(amounts=Sum("amounts"))
+                        .get("amounts")
+                        or 0,
                     },
                 ],
                 "return_rate": [
                     {
                         "id": 1,
                         "name": "8_under",
-                        "price": portfolios.filter(
-                            investment__return_rate__lt=8
-                        ).aggregate(amounts=Sum("amounts"))["amounts"],
+                        "price": portfolios.filter(investment__return_rate__lt=8)
+                        .aggregate(amounts=Sum("amounts"))
+                        .get("amounts")
+                        or 0,
                     },
                     {
                         "id": 2,
@@ -233,7 +264,10 @@ class PortfolioView(View):
                         "price": portfolios.filter(
                             investment__return_rate__gte=8,
                             investment__return_rate__lt=10,
-                        ).aggregate(amounts=Sum("amounts"))["amounts"],
+                        )
+                        .aggregate(amounts=Sum("amounts"))
+                        .get("amounts")
+                        or 0,
                     },
                     {
                         "id": 3,
@@ -241,14 +275,18 @@ class PortfolioView(View):
                         "price": portfolios.filter(
                             investment__return_rate__gte=10,
                             investment__return_rate__lt=12,
-                        ).aggregate(amounts=Sum("amounts"))["amounts"],
+                        )
+                        .aggregate(amounts=Sum("amounts"))
+                        .get("amounts")
+                        or 0,
                     },
                     {
                         "id": 4,
                         "name": "12_over_or_equal",
-                        "price": portfolios.filter(
-                            investment__return_rate__gte=12
-                        ).aggregate(amounts=Sum("amounts"))["amounts"],
+                        "price": portfolios.filter(investment__return_rate__gte=12)
+                        .aggregate(amounts=Sum("amounts"))
+                        .get("amounts")
+                        or 0,
                     },
                 ],
             },
@@ -257,25 +295,37 @@ class PortfolioView(View):
         return JsonResponse({"results": results}, status=200)
 
 
-class TransactionInformationView(View):
+class TransactionHistoryView(View):
     @login_decorator
     def get(self, request):
 
-        type_id = request.GET.get("type_id",None)
+        type_id = request.GET.get("type_id", None)
         q = Q()
 
         if type_id:
-            q = Q(type = type_id)
-        
-        transactions = Transaction.objects.filter(user = request.user).filter(q)
-        
-        return JsonResponse({"transactions" : [
+            q = Q(type=type_id)
+
+        transactions = (
+            Transaction.objects.filter(user=request.user)
+            .filter(q)
+            .order_by("-created_time")
+        )
+
+        return JsonResponse(
             {
-                "created_time" : transaction.created_time, 
-                "type"         : transaction.type.name,
-                "information"  : transaction.information,
-                "amounts"      : transaction.amounts
-                } for transaction in transactions]}, status = 200)
+                "transactions": [
+                    {
+                        "created_time": transaction.created_time,
+                        "type": transaction.type.name,
+                        "information": transaction.information,
+                        "amounts": transaction.amounts,
+                    }
+                    for transaction in transactions
+                ]
+            },
+            status=200,
+        )
+
 
 class WithdrawalView(View):
     @login_decorator
@@ -286,7 +336,7 @@ class WithdrawalView(View):
 
             if data["amounts"] <= 0:
                 return JsonResponse({"message": "INVALID_INPUT"}, status=400)
-            
+
             if data["amounts"] > deposit.balance:
                 return JsonResponse({"message": "WRONG_REQUEST"}, status=400)
 
