@@ -13,7 +13,7 @@
 
 ### Teamates👨‍👦‍👦👩‍👧
 
-FrontEnd: 김현재, 최파란별, 이지영
+FrontEnd: 김현재, 최파란별, 이지영 <br>
 BackEnd: 김정수, 하예준
 
 ### 작업기간
